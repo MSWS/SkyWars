@@ -1,0 +1,50 @@
+package xyz.msws.skywars.game;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import xyz.msws.skywars.GamePlugin;
+import xyz.msws.skywars.data.GamePlayer;
+
+import java.util.List;
+
+public abstract class Game implements Listener {
+    protected List<GamePlayer> players;
+    protected GameStatus status;
+    protected Countdown cd;
+    protected GamePlugin plugin;
+
+    public Game(GamePlugin plugin) {
+        this.plugin = plugin;
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    public Countdown getCountdown() {
+        return cd;
+    }
+
+    public GameStatus getStatus() {
+        return status;
+    }
+
+    public abstract void onLoad();
+
+    public abstract void unLoad();
+
+    public abstract void start();
+
+    public abstract void stop();
+
+    public abstract boolean addPlayer(Player player);
+
+    public abstract boolean removePlayer(Player player);
+
+    public GamePlayer getPlayer(Player player) {
+        for (GamePlayer p : players)
+            if (p.getUUID().equals(player.getUniqueId()))
+                return p;
+        return null;
+    }
+
+
+}
