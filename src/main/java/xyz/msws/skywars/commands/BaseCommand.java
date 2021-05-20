@@ -25,7 +25,7 @@ public abstract class BaseCommand extends GameCommand implements CommandExecutor
             return true;
         }
 
-        SubCommand cmd = commands.get(args[0].toLowerCase());
+        SubCommand cmd = getCommand(args[0]);
         if (cmd == null) {
             MSG.tell(sender, "Unknown command.");
             return true;
@@ -49,26 +49,43 @@ public abstract class BaseCommand extends GameCommand implements CommandExecutor
     }
 
     @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        List<String> result = super.tabComplete(sender, alias, args);
+    public List<String> tabComplete(CommandSender sender, String label, String[] args) throws IllegalArgumentException {
+        List<String> result = super.tabComplete(sender, label, args);
         if (args.length == 0)
             return result;
         for (Map.Entry<String, SubCommand> cmd : commands.entrySet()) {
             if (cmd.getValue().getPermission() != null && !sender.hasPermission(cmd.getValue().getPermission()))
                 continue;
             if (cmd.getKey().equalsIgnoreCase(args[0])) {
-                result.addAll(cmd.getValue().tab(sender, alias, args));
+                result.addAll(cmd.getValue().tab(sender, label, args));
                 continue;
             }
             if (cmd.getKey().startsWith(args[0].toLowerCase())) {
                 result.add(cmd.getKey());
             }
+            for (String alias : cmd.getValue().getAliases()) {
+                if (alias.startsWith(args[0].toLowerCase()))
+                    result.add(alias);
+            }
         }
+        SubCommand selected = getCommand(args[0]);
+        if (selected != null)
+            result.addAll(selected.tabComplete(sender, label, args));
         return result;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         return tabComplete(sender, alias, args);
+    }
+
+    private SubCommand getCommand(String key) {
+        for (SubCommand cmd : commands.values()) {
+            if (cmd.getName().equalsIgnoreCase(key))
+                return cmd;
+            if (cmd.getAliases().contains(key.toLowerCase()))
+                return cmd;
+        }
+        return null;
     }
 }

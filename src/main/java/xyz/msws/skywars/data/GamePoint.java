@@ -2,7 +2,7 @@ package xyz.msws.skywars.data;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.data.BlockData;
+import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
 
 import java.lang.reflect.Constructor;
@@ -16,19 +16,19 @@ public abstract class GamePoint {
     }
 
     public GamePoint(World world, BlockVector vector) {
-        this.loc = vector.toLocation(world);
+        this(vector.toLocation(world));
     }
 
     public Location getLocation() {
         return loc;
     }
 
-    public abstract BlockData getRepresentation();
+    public abstract void applyTo(Block block);
 
     public enum Type {
         SPAWN(SpawnPoint.class), CHEST(null), ENEMY(null), TEAM(null), BARRIER(null), CENTER(null), BORDER(null), MISC(null), GAME_SPECIFIC(null);
 
-        private Class<? extends GamePoint> clazz;
+        private final Class<? extends GamePoint> clazz;
 
         Type(Class<? extends GamePoint> clazz) {
             this.clazz = clazz;
@@ -53,6 +53,7 @@ public abstract class GamePoint {
                 classes[i] = args[i].getClass();
             Constructor<T> con = null;
             try {
+                Constructor<?> constructor = clazz.getConstructor(classes);
                 con = (Constructor<T>) clazz.getConstructor(classes);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();

@@ -23,7 +23,7 @@ public class MapFileData extends MapData {
 
     public MapFileData(GamePlugin plugin, Map map) {
         super(plugin, map);
-        data = new File(plugin.getDataFolder(), map.getWorld().getName() + "._data.yml");
+        data = new File(plugin.getDataFolder(), map.getWorld().getName() + "_data.yml");
     }
 
     @Override
@@ -37,8 +37,7 @@ public class MapFileData extends MapData {
         parseWorld(call);
         saveData();
     }
-
-
+    
     @Override
     public void saveData() {
         config = new YamlConfiguration();

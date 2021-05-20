@@ -8,6 +8,5 @@ public class SkyBaseCommand extends BaseCommand {
         super(name, plugin);
 
         commands.put("parse", new ParseCommand("parse", plugin));
-        commands.put("world", new WorldCommand("world", plugin));
     }
 }
