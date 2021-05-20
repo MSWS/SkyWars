@@ -1,10 +1,12 @@
 package xyz.msws.skywars.commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import xyz.msws.skywars.GamePlugin;
+import xyz.msws.skywars.data.GamePoint;
 import xyz.msws.skywars.data.Map;
 import xyz.msws.skywars.utils.MSG;
 
@@ -28,8 +30,8 @@ public class ParseCommand extends SubCommand {
 
         MSG.tell(sender, "Loading world...");
         Map map = new Map(plugin, world);
-        map.getData().load(true);
-        MSG.tell(sender, "Successfully loaded!");
+        map.getData().addTarget(data -> data.getMaterial() == Material.GREEN_WOOL, GamePoint.Type.SPAWN);
+        map.getData().load(result -> MSG.tell(sender, "Successfully loaded!"), true);
         return true;
     }
 }

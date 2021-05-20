@@ -2,6 +2,7 @@ package xyz.msws.skywars.data;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import xyz.msws.skywars.GamePlugin;
+import xyz.msws.skywars.utils.Callback;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,19 +19,17 @@ public abstract class MapData implements ConfigurationSerializable {
         this.map = map;
     }
 
-    public void load() {
-        load(false);
+    public void load(Callback<MapData> call) {
+        load(call, false);
     }
 
-    public abstract void load(boolean refresh);
+    public abstract void load(Callback<MapData> data, boolean refresh);
 
     public abstract void saveData();
 
     public void addTarget(BlockQuery data, GamePoint.Type point) {
         targets.put(data, point);
     }
-
-    protected abstract void parseWorld();
 
     @Override
     public Map<String, Object> serialize() {

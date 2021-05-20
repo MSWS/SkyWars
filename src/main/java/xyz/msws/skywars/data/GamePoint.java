@@ -38,13 +38,22 @@ public abstract class GamePoint {
             return clazz;
         }
 
-        public <T extends GamePoint> T generate(Object... args) {
+        public <T extends GamePoint> T generate(Location loc) {
+            return this.generate((Object) loc);
+        }
+
+        public <T extends GamePoint> T generate(World world, BlockVector vector) {
+            return generate(world, (Object) vector);
+        }
+
+
+        <T extends GamePoint> T generate(Object... args) {
             Class<?>[] classes = new Class[args.length];
             for (int i = 0; i < args.length; i++)
                 classes[i] = args[i].getClass();
             Constructor<T> con = null;
             try {
-                con = (Constructor<T>) clazz.getDeclaredConstructor(classes);
+                con = (Constructor<T>) clazz.getConstructor(classes);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
                 return null;

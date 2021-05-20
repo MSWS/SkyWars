@@ -1,9 +1,6 @@
 package xyz.msws.skywars.data;
 
-import org.bukkit.ChunkSnapshot;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,14 +27,14 @@ public class MapFileData extends MapData {
     }
 
     @Override
-    public void load(boolean refresh) {
+    public void load(Callback<MapData> call, boolean refresh) {
         if (points != null)
             return;
         if (!refresh && data.exists()) {
-            parseFile();
+            parseFile(call);
             return;
         }
-        parseWorld();
+        parseWorld(call);
         saveData();
     }
 
@@ -68,11 +65,13 @@ public class MapFileData extends MapData {
         }
     }
 
-    private void parseFile() {
+    private void parseFile(Callback<MapData> call) {
         points = new HashMap<>();
         java.util.Map<GamePoint.Type, List<BlockVector>> blocks = new HashMap<>();
-        if (!data.exists())
+        if (!data.exists()) {
+            call.execute(this);
             return;
+        }
         config = YamlConfiguration.loadConfiguration(data);
         for (java.util.Map.Entry<String, Object> entry : config.getValues(false).entrySet()) {
             GamePoint.Type type;
@@ -119,13 +118,11 @@ public class MapFileData extends MapData {
             }
             blocks.put(type, vectors);
         }
-        generateGamepoints(blocks);
+        generateGamepoints(blocks, call);
     }
 
-    @Override
-    protected void parseWorld() {
+    protected void parseWorld(Callback<MapData> call) {
         World world = map.getWorld();
-//        world.getWorldBorder().setSize(5);
         MSG.log("Begin parsing of world %s", world.getName());
         MSG.log("Loading chunks...");
         loadAllChunks(world, result -> {
@@ -134,76 +131,80 @@ public class MapFileData extends MapData {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    parseNext(result, 0, points);
+                    parseNext(result, 0, points, call);
                 }
             }.runTaskAsynchronously(plugin);
-            generateGamepoints(points);
         });
-
     }
 
-    private void parseNext(List<ChunkSnapshot> snapshots, int index, java.util.Map<GamePoint.Type, List<BlockVector>> data) {
+    private void parseNext(List<ChunkSnapshot> snapshots, int index, java.util.Map<GamePoint.Type, List<BlockVector>> data, Callback<MapData> call) {
         if (index == snapshots.size()) {
             MSG.log("Finished parsing chunks, generating game points...");
-            generateGamepoints(data);
+            generateGamepoints(data, call);
             return;
         }
-        MSG.log("Parsing chunk %d/%d (%.2f%%)", index, snapshots.size(), ((double) index / snapshots.size()) * 100.0);
         parseChunk(snapshots.get(index), data);
-        parseNext(snapshots, index + 1, data);
+        parseNext(snapshots, index + 1, data, call);
     }
 
     protected void loadAllChunks(World world, Callback<List<ChunkSnapshot>> call) {
         WorldBorder border = world.getWorldBorder();
-        border.setSize(2000);
-        int chunks = (int) Math.ceil(border.getSize() / 16.0);
+        int chunks = (int) Math.pow(Math.ceil(border.getSize() / 16.0), 2);
+        int size = (int) (border.getSize() / 2);
         Location center = border.getCenter();
         List<ChunkSnapshot> snapshots = new ArrayList<>();
-        long start = System.currentTimeMillis();
 
-        int threads = (int) Math.ceil(chunks / 16.0);
-        int blockAmo = chunks / threads;
+        int threads = (int) Math.ceil(chunks / 8.0) + 1;
+        int chunkAmo = chunks / threads;
+        MSG.log("Loading %d chunks (size: %d)", chunks, size);
+        MSG.log("Using %d threads, each thread covering %d chunks", threads, chunkAmo);
 
         new BukkitRunnable() {
-            int x = center.getBlockX() - chunks * 8;
-            int z = center.getBlockZ() - chunks * 8;
+            int x = center.getBlockX() - size;
+            int z = center.getBlockZ() - size;
 
             @Override
             public void run() {
-                if (x >= center.getBlockX() + chunks * 8) {
-                    x = center.getBlockX() - chunks * 8;
-                    z += blockAmo * 16;
-                }
-                snapshots.addAll(loadChunks(world, x, z, x + blockAmo * 16, z + blockAmo * 16));
-                x += blockAmo * 16;
-                z += blockAmo * 16;
-                if (z > center.getBlockZ() + chunks * 8) {
-                    this.cancel();
-                    call.execute(snapshots);
+                MSG.log("Mass chunk loading %d %d", x, z);
+                List<ChunkSnapshot> result = loadChunks(world, x, z, x + chunkAmo * 16, z + chunkAmo * 16);
+                snapshots.addAll(result);
+                x += chunkAmo * 16;
+                if (x >= center.getBlockX() + size) {
+                    x = center.getBlockX() - size;
+                    z += chunkAmo * 16;
+                    if (z > center.getBlockZ() + size) {
+                        MSG.log("Finished loading all chunks (%d/%d)", snapshots.size(), chunks);
+                        call.execute(snapshots);
+                        this.cancel();
+                    }
                 }
             }
-        }.runTaskTimer(plugin, 0, 20);
+        }.runTaskTimer(plugin, 0, 15);
     }
 
     private List<ChunkSnapshot> loadChunks(World world, int minX, int minZ, int maxX, int maxZ) {
         List<ChunkSnapshot> snapshots = new ArrayList<>();
+        MSG.log("Loading %d chunks", ((maxX - minX) / 16 * (maxZ - minZ) / 16));
         for (int x = minX; x < maxX; x += 16) {
             for (int z = minZ; z < maxZ; z += 16) {
-                snapshots.add(world.getChunkAt(x, z).getChunkSnapshot());
+                Location loc = new Location(world, x, 0, z);
+                snapshots.add(world.getChunkAt(loc).getChunkSnapshot());
             }
         }
         return snapshots;
     }
 
-    private void generateGamepoints(java.util.Map<GamePoint.Type, List<BlockVector>> types) {
+    private void generateGamepoints(java.util.Map<GamePoint.Type, List<BlockVector>> types, Callback<MapData> call) {
         points = new HashMap<>();
         for (java.util.Map.Entry<GamePoint.Type, List<BlockVector>> entry : types.entrySet()) {
             List<GamePoint> pointList = points.getOrDefault(entry.getKey(), new ArrayList<>());
             for (BlockVector vec : entry.getValue()) {
-                pointList.add(entry.getKey().generate(map.getWorld(), vec));
+                pointList.add(entry.getKey().generate(vec.toLocation(map.getWorld())));
             }
             points.put(entry.getKey(), pointList);
         }
+        call.execute(this);
+        MSG.log("Successfully generated %d gamepoints", points.size());
     }
 
     private void parseChunk(ChunkSnapshot cs, java.util.Map<GamePoint.Type, List<BlockVector>> result) {
@@ -218,6 +219,8 @@ public class MapFileData extends MapData {
 
     private void parseBlock(ChunkSnapshot cs, int x, int y, int z, java.util.Map<GamePoint.Type, List<BlockVector>> result) {
         BlockData block = cs.getBlockData(x, y, z);
+        if (block.getMaterial() == Material.AIR)
+            return;
 
         for (java.util.Map.Entry<BlockQuery, GamePoint.Type> entry : targets.entrySet()) {
             if (!entry.getKey().matches(block))

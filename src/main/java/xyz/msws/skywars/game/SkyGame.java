@@ -26,7 +26,7 @@ public class SkyGame extends Game {
 
         data.addTarget(d -> d.getMaterial() == Material.GREEN_WOOL, GamePoint.Type.SPAWN);
 
-        gameMap.getData().load(true);
+        gameMap.getData().load(null);
     }
 
     @Override
