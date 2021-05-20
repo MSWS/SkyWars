@@ -9,12 +9,15 @@ public class Map {
 
     public Map(GamePlugin plugin, World world) {
         this.world = world;
-        this.data = new MapData(plugin, this);
+        this.data = new MapFileData(plugin, this);
     }
 
     public World getWorld() {
         return world;
     }
 
+    public MapData getData() {
+        return data;
+    }
 
 }

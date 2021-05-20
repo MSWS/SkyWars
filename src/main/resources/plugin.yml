@@ -1,3 +1,9 @@
 name: SkyWars
 version: 1.0.a
 main: xyz.msws.skywars.SkyWars
+api-version: 1.16
+commands:
+  skywars:
+    usage: /<command>
+    aliases:
+      - sw
