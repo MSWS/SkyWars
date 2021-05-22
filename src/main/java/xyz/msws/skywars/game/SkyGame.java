@@ -3,11 +3,13 @@ package xyz.msws.skywars.game;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import xyz.msws.skywars.GamePlugin;
-import xyz.msws.skywars.data.GamePlayer;
+import xyz.msws.skywars.data.GameMap;
 import xyz.msws.skywars.data.GamePoint;
-import xyz.msws.skywars.data.Map;
 import xyz.msws.skywars.data.MapData;
+
+import java.util.List;
 
 public class SkyGame extends Game {
 
@@ -19,13 +21,14 @@ public class SkyGame extends Game {
         this.game = game;
     }
 
+    public static final String SPAWN_SKIN = "http://textures.minecraft.net/texture/8b8a99cbe98f09c87417abd4ec12f779a52d83314fc474be507d420573366ba7";
+
     @Override
     public void onLoad() {
-        Map gameMap = new Map(plugin, game);
+        GameMap gameMap = new GameMap(plugin, game);
         MapData data = gameMap.getData();
 
-        data.addTarget(d -> d.getMaterial() == Material.GREEN_WOOL, GamePoint.Type.SPAWN);
-
+        data.addTarget(d -> d.getType() == Material.GREEN_WOOL ? GamePoint.Type.SPAWN : GamePoint.Type.NONE);
         gameMap.getData().load(null);
     }
 
@@ -36,9 +39,6 @@ public class SkyGame extends Game {
 
     @Override
     public void start() {
-        for (GamePlayer players : players) {
-
-        }
 
     }
 
@@ -55,5 +55,12 @@ public class SkyGame extends Game {
     @Override
     public boolean removePlayer(Player player) {
         return false;
+    }
+
+    @Override
+    public List<ItemStack> getBuildItems() {
+
+
+        return null;
     }
 }

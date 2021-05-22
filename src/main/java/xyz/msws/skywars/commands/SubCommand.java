@@ -3,7 +3,6 @@ package xyz.msws.skywars.commands;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import xyz.msws.skywars.GamePlugin;
-import xyz.msws.skywars.utils.MSG;
 
 import java.util.List;
 
@@ -22,7 +21,6 @@ public abstract class SubCommand extends GameCommand {
         for (int i = 0; i < array.length; i++) {
             if (i >= nArgs.length)
                 break;
-            MSG.log("Setting %d of %d to %s", i, i + depth, array[i + depth]);
             nArgs[i] = array[i + depth];
         }
         return nArgs;

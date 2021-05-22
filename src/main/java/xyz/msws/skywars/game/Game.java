@@ -3,6 +3,7 @@ package xyz.msws.skywars.game;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import xyz.msws.skywars.GamePlugin;
 import xyz.msws.skywars.data.GamePlayer;
 
@@ -46,5 +47,6 @@ public abstract class Game implements Listener {
         return null;
     }
 
+    public abstract List<ItemStack> getBuildItems();
 
 }

@@ -26,7 +26,7 @@ public abstract class GamePoint {
     public abstract void applyTo(Block block);
 
     public enum Type {
-        SPAWN(SpawnPoint.class), CHEST(null), ENEMY(null), TEAM(null), BARRIER(null), CENTER(null), BORDER(null), MISC(null), GAME_SPECIFIC(null);
+        SPAWN(SpawnPoint.class), CHEST(null), ENEMY(null), TEAM(null), BARRIER(null), CENTER(null), BORDER(null), MISC(null), GAME_SPECIFIC(null), NONE(null);
 
         private final Class<? extends GamePoint> clazz;
 

@@ -6,6 +6,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.msws.skywars.commands.SkyBaseCommand;
+import xyz.msws.skywars.commands.TestBaseCommand;
 import xyz.msws.skywars.game.Game;
 import xyz.msws.skywars.game.SkyGame;
 
@@ -23,6 +24,7 @@ public class SkyWars extends JavaPlugin implements GamePlugin {
 
 
         getCommand("skywars").setExecutor(new SkyBaseCommand("skywars", this));
+        getCommand("test").setExecutor(new TestBaseCommand("test", this));
     }
 
     public World getGameWorld() {

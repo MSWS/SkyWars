@@ -3,11 +3,12 @@ package xyz.msws.skywars.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Skull;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import xyz.msws.skywars.GamePlugin;
+import xyz.msws.skywars.data.GameMap;
 import xyz.msws.skywars.data.GamePoint;
-import xyz.msws.skywars.data.Map;
 import xyz.msws.skywars.utils.MSG;
 
 public class ParseCommand extends SubCommand {
@@ -29,9 +30,17 @@ public class ParseCommand extends SubCommand {
         }
 
         MSG.tell(sender, "Loading world...");
-        Map map = new Map(plugin, world);
-        map.getData().addTarget(data -> data.getMaterial() == Material.GREEN_WOOL, GamePoint.Type.SPAWN);
-        map.getData().load(result -> MSG.tell(sender, "Successfully loaded!"), true);
+        GameMap gameMap = new GameMap(plugin, world);
+
+        gameMap.getData().addTarget(state -> {
+            if (state.getType() != Material.PLAYER_HEAD)
+                return GamePoint.Type.NONE;
+            Skull skull = (Skull) state;
+            MSG.log("Skull casted");
+            return GamePoint.Type.NONE;
+        });
+
+        gameMap.getData().load(result -> MSG.tell(sender, "Successfully loaded!"), true);
         return true;
     }
 }

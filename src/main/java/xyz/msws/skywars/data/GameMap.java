@@ -3,11 +3,11 @@ package xyz.msws.skywars.data;
 import org.bukkit.World;
 import xyz.msws.skywars.GamePlugin;
 
-public class Map {
+public class GameMap {
     private World world;
     private MapData data;
 
-    public Map(GamePlugin plugin, World world) {
+    public GameMap(GamePlugin plugin, World world) {
         this.world = world;
         this.data = new MapFileData(plugin, this);
     }
