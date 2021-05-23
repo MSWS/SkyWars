@@ -7,10 +7,8 @@ import org.bukkit.WorldBorder;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.metadata.Metadatable;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 import xyz.msws.skywars.GamePlugin;
 import xyz.msws.skywars.utils.Callback;
 import xyz.msws.skywars.utils.MSG;
@@ -133,20 +131,12 @@ public class MapFileData extends MapData {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    parseNext(states.iterator(), 0, points, call);
+                    for (BlockState state : states) parseBlock(state, points);
+                    MSG.log("Finished parsing chunks, generating game points...");
+                    generateGamepoints(points, call);
                 }
             }.runTaskAsynchronously(plugin);
         });
-    }
-
-    private void parseNext(Iterator<BlockState> chunks, int index, Map<GamePoint.Type, List<BlockVector>> data, Callback<MapData> call) {
-        if (!chunks.hasNext()) {
-            MSG.log("Finished parsing chunks, generating game points...");
-            generateGamepoints(data, call);
-            return;
-        }
-        parseBlock(chunks.next(), data);
-        parseNext(chunks, index + 1, data, call);
     }
 
     protected void loadAllChunks(World world, Callback<ChunkStateList> call) {
@@ -190,15 +180,13 @@ public class MapFileData extends MapData {
         Set<Chunk> loaded = new HashSet<>();
         for (int x = minX; x < maxX; x += 16) {
             for (int z = minZ; z < maxZ; z += 16) {
-                for (int bx = 0; bx < 16; bx++) {
-                    Chunk chunk = world.getChunkAt(new Location(world, x, 0, z));
-                    chunk.setForceLoaded(true);
-                    states.add(chunk);
-                    chunk.setForceLoaded(false);
-                    if (loaded.contains(chunk))
-                        MSG.log("DUPLICATE CHUNK LOAD %d, %d", x, z);
-                    loaded.add(chunk);
-                }
+                Chunk chunk = world.getChunkAt(new Location(world, x, 0, z));
+                chunk.setForceLoaded(true);
+                states.add(chunk);
+                chunk.setForceLoaded(false);
+                if (loaded.contains(chunk))
+                    MSG.log("DUPLICATE CHUNK LOAD %d, %d", x, z);
+                loaded.add(chunk);
             }
         }
         return states;

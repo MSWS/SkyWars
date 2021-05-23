@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import xyz.msws.skywars.GamePlugin;
+import xyz.msws.skywars.data.BlockTarget;
 import xyz.msws.skywars.data.GamePlayer;
+import xyz.msws.skywars.utils.Callback;
 
 import java.util.List;
 
@@ -28,9 +30,9 @@ public abstract class Game implements Listener {
         return status;
     }
 
-    public abstract void onLoad();
+    public abstract void load(Callback<Game> call);
 
-    public abstract void unLoad();
+    public abstract void unload();
 
     public abstract void start();
 
@@ -48,5 +50,7 @@ public abstract class Game implements Listener {
     }
 
     public abstract List<ItemStack> getBuildItems();
+
+    public abstract List<BlockTarget> getTargets();
 
 }

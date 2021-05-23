@@ -5,10 +5,14 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.msws.skywars.GamePlugin;
+import xyz.msws.skywars.data.BlockTarget;
 import xyz.msws.skywars.data.GameMap;
 import xyz.msws.skywars.data.GamePoint;
-import xyz.msws.skywars.data.MapData;
+import xyz.msws.skywars.utils.Callback;
+import xyz.msws.skywars.utils.CustomSkull;
+import xyz.msws.skywars.utils.MSG;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SkyGame extends Game {
@@ -21,19 +25,18 @@ public class SkyGame extends Game {
         this.game = game;
     }
 
-    public static final String SPAWN_SKIN = "http://textures.minecraft.net/texture/8b8a99cbe98f09c87417abd4ec12f779a52d83314fc474be507d420573366ba7";
+    public static final String SPAWN_SKIN = "3ed9d96c393e38a36b61aa3c859ede5eb744ef1e846d4f7d0ecbd6588a021";
 
     @Override
-    public void onLoad() {
+    public void load(Callback<Game> call) {
         GameMap gameMap = new GameMap(plugin, game);
-        MapData data = gameMap.getData();
-
-        data.addTarget(d -> d.getType() == Material.GREEN_WOOL ? GamePoint.Type.SPAWN : GamePoint.Type.NONE);
-        gameMap.getData().load(null);
+        for (BlockTarget bt : getTargets())
+            gameMap.getData().addTarget(bt);
+        gameMap.getData().load(result -> call.execute(SkyGame.this), true);
     }
 
     @Override
-    public void unLoad() {
+    public void unload() {
 
     }
 
@@ -62,5 +65,23 @@ public class SkyGame extends Game {
 
 
         return null;
+    }
+
+    @Override
+    public List<BlockTarget> getTargets() {
+        List<BlockTarget> targets = new ArrayList<>();
+        targets.add(state -> {
+            if (state.getType() != Material.PLAYER_HEAD)
+                return GamePoint.Type.NONE;
+            CustomSkull skull = CustomSkull.fromBlock(state);
+            MSG.log("Skull string: %s", skull.getURLId());
+            switch (skull.getURLId()) {
+                case SPAWN_SKIN:
+                    return GamePoint.Type.SPAWN;
+                default:
+                    return GamePoint.Type.NONE;
+            }
+        });
+        return targets;
     }
 }

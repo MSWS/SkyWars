@@ -14,7 +14,7 @@ public class SkyWars extends JavaPlugin implements GamePlugin {
 
     private World lobby, gameWorld;
 
-    private Game game;
+    private SkyGame game;
 
     @Override
     public void onEnable() {
@@ -35,7 +35,7 @@ public class SkyWars extends JavaPlugin implements GamePlugin {
         return lobby;
     }
 
-    public Game getGame() {
+    public SkyGame getGame() {
         return game;
     }
 }

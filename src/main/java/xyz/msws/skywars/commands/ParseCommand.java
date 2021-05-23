@@ -1,20 +1,24 @@
 package xyz.msws.skywars.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Skull;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import xyz.msws.skywars.GamePlugin;
-import xyz.msws.skywars.data.GameMap;
-import xyz.msws.skywars.data.GamePoint;
+import xyz.msws.skywars.SkyWars;
+import xyz.msws.skywars.game.SkyGame;
 import xyz.msws.skywars.utils.MSG;
 
+import java.lang.reflect.Field;
+
 public class ParseCommand extends SubCommand {
-    protected ParseCommand(String name, GamePlugin plugin) {
+    private SkyWars plugin;
+
+    public ParseCommand(String name, SkyWars plugin) {
         super(name, plugin);
+        this.plugin = plugin;
     }
+
+    private static Field profileField;
 
     @Override
     protected boolean exec(CommandSender sender, String label, String[] args) {
@@ -29,18 +33,9 @@ public class ParseCommand extends SubCommand {
             return true;
         }
 
+        SkyGame game = plugin.getGame();
         MSG.tell(sender, "Loading world...");
-        GameMap gameMap = new GameMap(plugin, world);
-
-        gameMap.getData().addTarget(state -> {
-            if (state.getType() != Material.PLAYER_HEAD)
-                return GamePoint.Type.NONE;
-            Skull skull = (Skull) state;
-            MSG.log("Skull casted");
-            return GamePoint.Type.NONE;
-        });
-
-        gameMap.getData().load(result -> MSG.tell(sender, "Successfully loaded!"), true);
+        game.load(result -> MSG.tell(sender, "Loaded"));
         return true;
     }
 }
