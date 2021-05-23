@@ -10,5 +10,6 @@ public class SkyBaseCommand extends BaseCommand {
 
         if (plugin instanceof SkyWars)
             commands.put("parse", new ParseCommand("parse", (SkyWars) plugin));
+        commands.put("start", new StartCommand("start", plugin));
     }
 }

@@ -3,6 +3,9 @@ package xyz.msws.skywars.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import xyz.msws.skywars.data.GamePlayer;
+import xyz.msws.skywars.game.Game;
 
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +36,15 @@ public class MSG {
      */
     public static void tell(CommandSender sender, Sendable message, Object... format) {
         tell(sender, message.format(format));
+    }
+
+    public static void tell(Game game, String message, Object... format) {
+        for (GamePlayer gp : game.getPlayers()) {
+            Player p = gp.getPlayer();
+            if (p == null)
+                continue;
+            MSG.tell(p, message, format);
+        }
     }
 
     /**

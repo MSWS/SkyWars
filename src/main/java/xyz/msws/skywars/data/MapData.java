@@ -31,6 +31,14 @@ public abstract class MapData implements ConfigurationSerializable {
         targets.add(data);
     }
 
+    public List<GamePoint> getGamePoints(GamePoint.Type type) {
+        return points.getOrDefault(type, new ArrayList<>());
+    }
+
+    public Map<GamePoint.Type, List<GamePoint>> getGamePoints() {
+        return points;
+    }
+
     @Override
     public Map<String, Object> serialize() {
         return null;

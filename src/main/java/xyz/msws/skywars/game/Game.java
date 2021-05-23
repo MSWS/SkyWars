@@ -49,6 +49,10 @@ public abstract class Game implements Listener {
         return null;
     }
 
+    public List<GamePlayer> getPlayers() {
+        return players;
+    }
+
     public abstract List<ItemStack> getBuildItems();
 
     public abstract List<BlockTarget> getTargets();
