@@ -10,6 +10,8 @@ import xyz.msws.skywars.data.GamePlayer;
 import xyz.msws.skywars.utils.Callback;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public abstract class Game implements Listener {
     protected List<GamePlayer> players;
@@ -53,8 +55,16 @@ public abstract class Game implements Listener {
         return players;
     }
 
+    public List<Player> getValidPlayers() {
+        return this.players.stream().map(GamePlayer::getPlayer).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
     public abstract List<ItemStack> getBuildItems();
 
     public abstract List<BlockTarget> getTargets();
+
+    public GamePlugin getPlugin() {
+        return plugin;
+    }
 
 }
